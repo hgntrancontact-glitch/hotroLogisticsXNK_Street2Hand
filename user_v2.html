@@ -1,0 +1,387 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Hỗ Trợ Học XNK Logistics</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  *{box-sizing:border-box;margin:0;padding:0;}
+  html,body{height:100%;font-family:'Inter',sans-serif;background:#fff;color:#111;}
+  ::-webkit-scrollbar{width:5px;}
+  ::-webkit-scrollbar-thumb{background:#e5e7eb;border-radius:4px;}
+
+  #app{display:flex;flex-direction:column;height:100vh;max-width:720px;margin:0 auto;}
+
+  /* Header */
+  #header{display:flex;align-items:center;gap:10px;padding:14px 20px;border-bottom:1px solid #f0f0f0;flex-shrink:0;}
+  .avatar{width:36px;height:36px;border-radius:10px;background:linear-gradient(135deg,#00B89C,#6C5CE7);display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+  #brand{font-size:15px;font-weight:600;color:#111;}
+  #sub{font-size:12px;color:#9ca3af;margin-top:1px;}
+  .dot{width:8px;height:8px;border-radius:50%;background:#22c55e;margin-left:auto;}
+
+  /* Messages */
+  #msgs{flex:1;overflow-y:auto;padding:20px;display:flex;flex-direction:column;gap:16px;}
+
+  /* AI message */
+  .ai-row{display:flex;gap:10px;align-items:flex-start;}
+  .ai-av{width:28px;height:28px;border-radius:8px;background:linear-gradient(135deg,#00B89C,#6C5CE7);flex-shrink:0;display:flex;align-items:center;justify-content:center;}
+  .ai-bubble{font-size:14px;line-height:1.75;color:#111;flex:1;min-width:0;padding-top:2px;}
+
+  /* Welcome bubble */
+  .welcome{background:#f9f9f9;border:1px solid #efefef;border-radius:4px 16px 16px 16px;padding:14px 16px;white-space:pre-wrap;font-size:14px;line-height:1.7;color:#374151;}
+
+  /* User message */
+  .user-row{display:flex;justify-content:flex-end;}
+  .user-bubble{background:#111;color:#fff;border-radius:18px 18px 4px 18px;padding:10px 15px;max-width:78%;font-size:14px;line-height:1.6;word-break:break-word;}
+
+  /* Markdown */
+  .ai-bubble h1,.ai-bubble h2,.ai-bubble h3{font-weight:600;margin:0.9em 0 0.3em;}
+  .ai-bubble h1{font-size:16px;} .ai-bubble h2{font-size:15px;} .ai-bubble h3{font-size:14px;color:#374151;}
+  .ai-bubble p{margin:0.4em 0;}
+  .ai-bubble ul,.ai-bubble ol{padding-left:1.3em;margin:0.35em 0;}
+  .ai-bubble li{margin:0.2em 0;}
+  .ai-bubble strong{font-weight:600;}
+  .ai-bubble code{font-family:monospace;background:#f3f4f6;color:#111;padding:1px 5px;border-radius:4px;font-size:12.5px;}
+  .ai-bubble pre{background:#f9fafb;border:1px solid #e5e7eb;border-radius:8px;padding:12px;overflow-x:auto;margin:0.5em 0;}
+  .ai-bubble pre code{background:none;}
+  .ai-bubble table{width:100%;border-collapse:collapse;margin:0.5em 0;font-size:13px;}
+  .ai-bubble th{background:#f3f4f6;padding:7px 11px;text-align:left;border:1px solid #e5e7eb;font-weight:600;}
+  .ai-bubble td{padding:6px 11px;border:1px solid #e5e7eb;}
+  .ai-bubble tr:nth-child(even) td{background:#fafafa;}
+  .ai-bubble blockquote{border-left:3px solid #d1d5db;padding-left:11px;color:#6b7280;margin:0.4em 0;font-style:italic;}
+
+  /* Typing */
+  @keyframes blink{0%,80%,100%{opacity:.2;}40%{opacity:1;}}
+  .dot-anim{display:inline-block;width:6px;height:6px;border-radius:50%;background:#9ca3af;animation:blink 1.4s infinite;}
+  .dot-anim:nth-child(2){animation-delay:.2s;} .dot-anim:nth-child(3){animation-delay:.4s;}
+
+  /* Input */
+  #input-area{padding:10px 20px 18px;flex-shrink:0;}
+  #img-bar{display:none;padding:6px 0;}
+  #img-inner{display:inline-flex;align-items:center;gap:8px;background:#f3f4f6;border:1px solid #e5e7eb;border-radius:8px;padding:5px 10px;}
+  #img-thumb{width:36px;height:36px;object-fit:cover;border-radius:5px;}
+  #wrap{display:flex;align-items:flex-end;gap:8px;background:#f9f9f9;border:1.5px solid #e5e7eb;border-radius:14px;padding:5px 5px 5px 12px;transition:border-color .2s,box-shadow .2s;}
+  #wrap:focus-within{border-color:#111;box-shadow:0 0 0 3px rgba(0,0,0,.06);}
+  #inp{flex:1;background:transparent;border:none;outline:none;resize:none;font-family:'Inter',sans-serif;font-size:14px;color:#111;line-height:1.5;max-height:140px;min-height:34px;padding:5px 0;}
+  #inp::placeholder{color:#9ca3af;}
+  .ico-btn{flex-shrink:0;width:32px;height:32px;border:none;background:transparent;cursor:pointer;border-radius:7px;display:flex;align-items:center;justify-content:center;color:#9ca3af;transition:all .15s;}
+  .ico-btn:hover{background:#f0f0f0;color:#374151;}
+  #send{flex-shrink:0;width:34px;height:34px;border-radius:9px;border:none;background:#111;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .15s;}
+  #send:hover{background:#333;} #send:disabled{background:#e5e7eb;cursor:not-allowed;}
+  #hint{text-align:center;font-size:11px;color:#d1d5db;padding-top:5px;}
+
+  /* Error */
+  .err-bubble{background:#fef2f2;border:1px solid #fecaca;border-radius:10px;padding:10px 14px;font-size:13px;color:#991b1b;}
+
+  /* Fade */
+  @keyframes fu{from{opacity:0;transform:translateY(8px);}to{opacity:1;transform:translateY(0);}}
+  .fu{animation:fu .22s ease;}
+
+  @media(max-width:600px){
+    #app{max-width:100%;}
+    #msgs{padding:14px;}
+    #input-area{padding:8px 14px 14px;}
+    .user-bubble{max-width:86%;}
+  }
+</style>
+</head>
+<body>
+<div id="app">
+
+  <div id="header">
+    <div class="avatar">
+      <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
+        <path d="M3 1.5h12l2.5 2.5v10.5l-2.5 2.5H3L0.5 14.5V4L3 1.5Z" stroke="white" stroke-width="1.1" fill="rgba(255,255,255,0.18)"/>
+        <path d="M5 6.5h8M5 9h5.5M5 11.5h4" stroke="white" stroke-width="1" stroke-linecap="round"/>
+      </svg>
+    </div>
+    <div>
+      <div id="brand">Hỗ Trợ Học XNK Logistics</div>
+      <div id="sub">Trợ lý học tập XNK & Logistics</div>
+    </div>
+    <div class="dot"></div>
+  </div>
+
+  <div id="msgs"></div>
+
+  <div id="input-area">
+    <div id="img-bar">
+      <div id="img-inner">
+        <img id="img-thumb" src="" alt="">
+        <span style="font-size:12px;color:#6b7280;">Ảnh đính kèm</span>
+        <button onclick="rmImg()" style="background:none;border:none;cursor:pointer;color:#9ca3af;font-size:18px;line-height:1;padding:0 2px;">×</button>
+      </div>
+    </div>
+    <div id="wrap">
+      <button class="ico-btn" onclick="document.getElementById('fi').click()" title="Đính kèm ảnh">
+        <svg width="17" height="17" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
+          <rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/>
+          <polyline points="21 15 16 10 5 21"/>
+        </svg>
+      </button>
+      <input type="file" id="fi" accept="image/*" style="display:none" onchange="onFile(event)">
+      <textarea id="inp" rows="1" placeholder="Nhập câu hỏi... hoặc Ctrl+V dán ảnh"
+        onkeydown="onKey(event)" oninput="rsz(this)" onpaste="onPaste(event)"></textarea>
+      <button id="send" onclick="send()" title="Gửi">
+        <svg width="15" height="15" fill="none" stroke="white" stroke-width="2.2" viewBox="0 0 24 24">
+          <line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/>
+        </svg>
+      </button>
+    </div>
+    <div id="hint">Enter gửi · Shift+Enter xuống dòng · Ctrl+V dán ảnh</div>
+  </div>
+
+</div>
+<script>
+// ════════════════════════════════════════════
+// ⚙️  CẤU HÌNH — CHỈ CHỈNH SỬA PHẦN NÀY
+// ════════════════════════════════════════════
+const CONFIG = {
+  API_KEY: "AQ.Ab8RN6JVmBmTqPhkurFaeQ5SAOb4LGzVaRE_GGTQCpgUIlAH3g",
+  MODEL:   "gemini-2.0-flash",
+  BRAND:   "Hỗ Trợ Học XNK Logistics",
+  SUB:     "Trợ lý học tập XNK & Logistics",
+
+  WELCOME: `👋 Hi! Đây là Trợ lý AI hỗ trợ các bạn mua 2 khóa PASS XNK & Logistics của mình: Khoá Nghiệp vụ chứng từ & Khai báo hải quan và Khoá Sales XNK.
+
+💡 Trong quá trình học, nếu gặp nội dung khó hiểu hay cần một giảng viên giải đáp, bạn chỉ cần làm theo cách cực kỳ đơn giản sau:
+
+1. Gõ nhanh câu hỏi ngắn gọn: Cứ nhập thắc mắc của bạn một cách đơn giản, AI sẽ tự hiểu mà không cần trình bày phức tạp.
+
+2. Hoặc Chụp màn hình: Chụp lại bài tập, câu hỏi, lỗi tờ khai, mẫu chứng từ... rồi nhấn Ctrl + V dán thẳng vào đây để hỏi nhé!
+
+👉 Hãy nhập thắc mắc của bạn bên dưới, AI đã sẵn sàng hỗ trợ:`,
+
+  SYSTEM: `Bạn là Trợ lý AI học tập chuyên sâu về Xuất Nhập Khẩu (XNK) và Logistics của trung tâm Street 2 Hand.
+
+Nhiệm vụ: Hỗ trợ học viên đang học 2 khóa:
+- Khoá Nghiệp vụ chứng từ & Khai báo hải quan
+- Khoá Sales XNK
+
+Phong cách trả lời:
+- Luôn dùng tiếng Việt, thân thiện, dễ hiểu như người thầy giỏi
+- Giải thích ngắn gọn trước, dùng ví dụ thực tế
+- Dùng emoji phù hợp để dễ đọc
+- Nếu học viên gửi ảnh tờ khai hoặc bài tập, phân tích chi tiết và chỉ ra lỗi sai
+
+Kiến thức chuyên môn bao gồm:
+- Incoterms 2020 (EXW, FCA, FAS, FOB, CFR, CIF, CPT, CIP, DAP, DPU, DDP)
+- Quy trình thông quan hải quan Việt Nam (VNACCS/VCIS)
+- Chứng từ XNK: Invoice, Packing List, B/L, AWB, C/O, LC, T/T
+- HS Code và phân loại hàng hóa
+- Logistics: FCL, LCL, container, cước vận tải
+- Thanh toán quốc tế: L/C, T/T, D/P, D/A`
+};
+// ════════════════════════════════════════════
+
+// State
+let pendingImg = null;
+let loading = false;
+let rateLock = false;
+let history = [];
+
+// Init
+window.addEventListener('DOMContentLoaded', () => {
+  document.getElementById('brand').textContent = CONFIG.BRAND;
+  document.getElementById('sub').textContent   = CONFIG.SUB;
+  document.title = CONFIG.BRAND;
+  addWelcome(CONFIG.WELCOME);
+  document.getElementById('inp').focus();
+});
+
+// Welcome
+function addWelcome(txt) {
+  const box = document.getElementById('msgs');
+  const row = document.createElement('div');
+  row.className = 'ai-row fu';
+  row.innerHTML = `
+    <div class="ai-av">
+      <svg width="13" height="13" viewBox="0 0 13 13" fill="none">
+        <path d="M2 1h9l2 2v7l-2 2H2L0 10V3L2 1Z" stroke="white" stroke-width="0.9" fill="rgba(255,255,255,0.18)"/>
+      </svg>
+    </div>
+    <div class="welcome">${esc(txt)}</div>`;
+  box.appendChild(row);
+}
+
+// Image
+function onPaste(e) {
+  for (const item of (e.clipboardData?.items || [])) {
+    if (item.type.startsWith('image/')) { e.preventDefault(); loadImg(item.getAsFile()); return; }
+  }
+}
+function onFile(e) { if (e.target.files[0]) loadImg(e.target.files[0]); e.target.value=''; }
+function loadImg(file) {
+  const r = new FileReader();
+  r.onload = e => {
+    const url = e.target.result;
+    pendingImg = { b64: url.split(',')[1], mime: file.type||'image/jpeg', url };
+    document.getElementById('img-thumb').src = url;
+    document.getElementById('img-bar').style.display = 'block';
+  };
+  r.readAsDataURL(file);
+}
+function rmImg() {
+  pendingImg = null;
+  document.getElementById('img-bar').style.display = 'none';
+  document.getElementById('img-thumb').src = '';
+}
+
+// Input
+function onKey(e) { if (e.key==='Enter'&&!e.shiftKey){e.preventDefault();send();} }
+function rsz(el) { el.style.height='auto'; el.style.height=Math.min(el.scrollHeight,140)+'px'; }
+
+// Send
+async function send() {
+  if (loading || rateLock) return;
+  const inp = document.getElementById('inp');
+  const txt = inp.value.trim();
+  if (!txt && !pendingImg) return;
+
+  // Rate lock 3s
+  rateLock = true; setTimeout(()=>rateLock=false, 3000);
+
+  // Clear input
+  inp.value=''; inp.style.height='auto';
+  const img = pendingImg ? {...pendingImg} : null;
+  if (pendingImg) rmImg();
+
+  // Render user msg
+  addUserMsg(txt, img?.url);
+
+  // Build parts
+  const parts = [];
+  if (txt) parts.push({text: txt});
+  if (img) {
+    parts.push({inlineData:{mimeType:img.mime, data:img.b64}});
+    if (!txt) parts.push({text:'Hãy phân tích ảnh này chi tiết.'});
+  }
+
+  history.push({role:'user', parts});
+
+  // Loading
+  loading = true; setSend(false);
+  const loader = addLoader();
+
+  try {
+    const body = {
+      systemInstruction: { parts: [{text: CONFIG.SYSTEM}] },
+      contents: history.slice(-20),
+      generationConfig: { temperature: 0.7, maxOutputTokens: 2048 }
+    };
+
+    const res = await fetch(
+      `https://generativelanguage.googleapis.com/v1beta/models/${CONFIG.MODEL}:generateContent?key=${CONFIG.API_KEY}`,
+      { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify(body) }
+    );
+
+    if (!res.ok) {
+      const e = await res.json().catch(()=>({}));
+      throw new Error(e?.error?.message || `HTTP ${res.status}`);
+    }
+
+    const data = await res.json();
+    const reply = data.candidates?.[0]?.content?.parts?.[0]?.text || 'Xin lỗi, tôi không thể trả lời lúc này.';
+    loader.remove();
+    addAIMsg(reply);
+    history.push({role:'model', parts:[{text:reply}]});
+
+  } catch(err) {
+    loader.remove();
+    addErr(err.message);
+    history.pop();
+  } finally {
+    loading = false; setSend(true);
+  }
+}
+
+function addUserMsg(txt, imgUrl) {
+  const box = document.getElementById('msgs');
+  const wrap = document.createElement('div');
+  wrap.className = 'fu';
+  if (imgUrl) {
+    const ir = document.createElement('div');
+    ir.className = 'user-row';
+    ir.style.marginBottom = txt ? '6px' : '0';
+    ir.innerHTML = `<img src="${escA(imgUrl)}" style="max-width:200px;max-height:150px;border-radius:10px;object-fit:contain;border:1px solid #e5e7eb;">`;
+    wrap.appendChild(ir);
+  }
+  if (txt) {
+    const tr = document.createElement('div');
+    tr.className = 'user-row';
+    tr.innerHTML = `<div class="user-bubble">${esc(txt)}</div>`;
+    wrap.appendChild(tr);
+  }
+  box.appendChild(wrap); scrl();
+}
+
+function addLoader() {
+  const box = document.getElementById('msgs');
+  const row = document.createElement('div');
+  row.className = 'ai-row fu'; row.id = 'ld';
+  row.innerHTML = `
+    <div class="ai-av"><svg width="13" height="13" viewBox="0 0 13 13" fill="none"><path d="M2 1h9l2 2v7l-2 2H2L0 10V3L2 1Z" stroke="white" stroke-width="0.9" fill="rgba(255,255,255,0.18)"/></svg></div>
+    <div style="padding:8px 0;display:flex;gap:5px;align-items:center;">
+      <span class="dot-anim"></span><span class="dot-anim"></span><span class="dot-anim"></span>
+    </div>`;
+  box.appendChild(row); scrl(); return row;
+}
+
+function addAIMsg(txt) {
+  const box = document.getElementById('msgs');
+  const row = document.createElement('div');
+  row.className = 'ai-row fu';
+  row.innerHTML = `
+    <div class="ai-av"><svg width="13" height="13" viewBox="0 0 13 13" fill="none"><path d="M2 1h9l2 2v7l-2 2H2L0 10V3L2 1Z" stroke="white" stroke-width="0.9" fill="rgba(255,255,255,0.18)"/></svg></div>
+    <div class="ai-bubble">${md(txt)}</div>`;
+  box.appendChild(row); scrl();
+}
+
+function addErr(msg) {
+  const box = document.getElementById('msgs');
+  const d = document.createElement('div');
+  d.className = 'err-bubble fu';
+  d.textContent = '❌ ' + msg;
+  box.appendChild(d); scrl();
+}
+
+function setSend(on) {
+  const b = document.getElementById('send');
+  b.disabled = !on; b.style.background = on ? '#111' : '#e5e7eb';
+}
+function scrl() { setTimeout(()=>{const b=document.getElementById('msgs');b.scrollTop=b.scrollHeight;},40); }
+
+// Markdown
+function md(t) {
+  if (!t) return '';
+  let h = esc(t);
+  h = h.replace(/```[\w]*\n?([\s\S]*?)```/g,'<pre><code>$1</code></pre>');
+  h = h.replace(/`([^`]+)`/g,'<code>$1</code>');
+  h = h.replace(/^### (.+)$/gm,'<h3>$1</h3>');
+  h = h.replace(/^## (.+)$/gm,'<h2>$1</h2>');
+  h = h.replace(/^# (.+)$/gm,'<h1>$1</h1>');
+  h = h.replace(/\*\*\*(.+?)\*\*\*/g,'<strong><em>$1</em></strong>');
+  h = h.replace(/\*\*(.+?)\*\*/g,'<strong>$1</strong>');
+  h = h.replace(/\*(.+?)\*/g,'<em>$1</em>');
+  h = h.replace(/^&gt; (.+)$/gm,'<blockquote>$1</blockquote>');
+  h = h.replace(/^\s*[-*] (.+)$/gm,'<li>$1</li>');
+  h = h.replace(/(<li>[\s\S]*?<\/li>)+/g,'<ul>$&</ul>');
+  h = h.replace(/^\d+\. (.+)$/gm,'<li>$1</li>');
+  h = h.replace(/\|(.+)\|\n\|[-| :]+\|\n((?:\|.+\|\n?)+)/g,(_,hdr,rows)=>{
+    const ths=hdr.split('|').filter(s=>s.trim()).map(s=>`<th>${s.trim()}</th>`).join('');
+    const trs=rows.trim().split('\n').map(r=>'<tr>'+r.split('|').filter(s=>s.trim()).map(s=>`<td>${s.trim()}</td>`).join('')+'</tr>').join('');
+    return `<table><thead><tr>${ths}</tr></thead><tbody>${trs}</tbody></table>`;
+  });
+  h = h.replace(/\n\n+/g,'</p><p>');
+  h = h.replace(/\n/g,'<br>');
+  h = `<p>${h}</p>`;
+  h = h.replace(/<p>(<[hupbt])/g,'$1').replace(/(<\/[hupbt][^>]*>)<\/p>/g,'$1').replace(/<p><\/p>/g,'');
+  return h;
+}
+function esc(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
+function escA(s){return String(s).replace(/"/g,'&quot;');}
+</script>
+</body>
+</html>
