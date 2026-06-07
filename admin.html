@@ -1,0 +1,429 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>S2H AI — Admin Panel</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;500;600;700&family=Space+Grotesk:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  *{box-sizing:border-box;}
+  body{font-family:'Space Grotesk',sans-serif;background:#0F1117;color:#E2E8F0;min-height:100vh;}
+  ::-webkit-scrollbar{width:4px;} ::-webkit-scrollbar-thumb{background:rgba(255,255,255,0.12);border-radius:4px;}
+
+  .card{background:#1A1D27;border:1px solid rgba(255,255,255,0.07);border-radius:16px;padding:24px;}
+  .label{font-size:11px;font-weight:600;letter-spacing:0.08em;text-transform:uppercase;color:#6B7280;margin-bottom:8px;display:block;}
+  .inp{width:100%;background:#0F1117;border:1.5px solid rgba(255,255,255,0.08);border-radius:10px;padding:10px 14px;color:#E2E8F0;font-family:'Space Grotesk',sans-serif;font-size:14px;transition:border-color 0.2s,box-shadow 0.2s;outline:none;}
+  .inp:focus{border-color:#00E5C3;box-shadow:0 0 0 3px rgba(0,229,195,0.1);}
+  .inp::placeholder{color:#4B5563;}
+  textarea.inp{resize:vertical;min-height:120px;line-height:1.6;}
+  .btn-primary{background:linear-gradient(135deg,#00E5C3,#7C6AFA);border:none;border-radius:10px;padding:11px 20px;color:white;font-weight:600;font-size:14px;cursor:pointer;transition:all 0.2s;font-family:'Space Grotesk',sans-serif;}
+  .btn-primary:hover{opacity:0.88;transform:translateY(-1px);}
+  .btn-secondary{background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.1);border-radius:10px;padding:10px 18px;color:#E2E8F0;font-weight:500;font-size:14px;cursor:pointer;transition:all 0.2s;font-family:'Space Grotesk',sans-serif;}
+  .btn-secondary:hover{background:rgba(255,255,255,0.1);}
+  .btn-danger{background:rgba(255,91,91,0.1);border:1px solid rgba(255,91,91,0.25);border-radius:10px;padding:8px 14px;color:#FF7070;font-size:13px;cursor:pointer;transition:all 0.2s;font-family:'Space Grotesk',sans-serif;}
+  .btn-danger:hover{background:rgba(255,91,91,0.18);}
+  .badge{display:inline-flex;align-items:center;gap:5px;padding:3px 10px;border-radius:999px;font-size:11px;font-weight:600;}
+  .badge-ok{background:rgba(0,229,195,0.12);color:#00E5C3;border:1px solid rgba(0,229,195,0.25);}
+  .badge-miss{background:rgba(255,91,91,0.1);color:#FF7070;border:1px solid rgba(255,91,91,0.2);}
+  .drop-zone{border:1.5px dashed rgba(0,229,195,0.3);border-radius:12px;padding:28px;text-align:center;cursor:pointer;transition:all 0.2s;background:rgba(0,229,195,0.03);}
+  .drop-zone:hover,.drop-zone.drag{border-color:#00E5C3;background:rgba(0,229,195,0.06);}
+  .tab-btn{padding:8px 18px;border-radius:8px;font-size:13px;font-weight:500;cursor:pointer;transition:all 0.15s;border:none;font-family:'Space Grotesk',sans-serif;color:#9CA3AF;background:transparent;}
+  .tab-btn.active{background:rgba(0,229,195,0.12);color:#00E5C3;}
+  .section-dot{width:8px;height:8px;border-radius:50%;background:linear-gradient(135deg,#00E5C3,#7C6AFA);}
+  .file-item{display:flex;align-items:center;gap:10px;padding:10px 14px;background:#0F1117;border:1px solid rgba(255,255,255,0.06);border-radius:10px;margin-bottom:8px;}
+
+  @keyframes fadeIn{from{opacity:0;transform:translateY(8px);}to{opacity:1;transform:translateY(0);}}
+  .fade-in{animation:fadeIn 0.3s ease;}
+
+  .status-bar{background:#0A0D14;border-bottom:1px solid rgba(255,255,255,0.06);padding:12px 32px;display:flex;align-items:center;gap:16px;font-size:13px;}
+  .pulse{width:8px;height:8px;border-radius:50%;background:#00E5C3;box-shadow:0 0 6px rgba(0,229,195,0.6);animation:pulse-anim 2s infinite;}
+  @keyframes pulse-anim{0%,100%{opacity:1;}50%{opacity:0.4;}}
+</style>
+</head>
+<body>
+
+<!-- Top status bar -->
+<div class="status-bar">
+  <div class="pulse" id="status-dot" style="background:#6B7280;box-shadow:none;"></div>
+  <span id="status-text" style="color:#6B7280;">Chưa cấu hình</span>
+  <span style="color:#374151;margin:0 4px;">·</span>
+  <span style="color:#4B5563;">Admin Panel</span>
+  <div style="margin-left:auto;display:flex;align-items:center;gap:12px;">
+    <a href="user.html" target="_blank" class="btn-secondary" style="padding:6px 14px;font-size:12px;text-decoration:none;">
+      👁 Xem trang User →
+    </a>
+  </div>
+</div>
+
+<!-- Header -->
+<div style="padding:32px 32px 0;">
+  <div style="display:flex;align-items:center;gap:14px;margin-bottom:6px;">
+    <div style="width:40px;height:40px;border-radius:12px;background:linear-gradient(135deg,#00E5C3,#7C6AFA);display:flex;align-items:center;justify-content:center;">
+      <svg width="22" height="22" viewBox="0 0 22 22" fill="none"><path d="M4 2h14l3 3v12l-3 3H4L1 17V5L4 2Z" stroke="white" stroke-width="1.3" fill="rgba(255,255,255,0.15)"/><path d="M6 8h10M6 11h7M6 14h5" stroke="white" stroke-width="1.2" stroke-linecap="round"/></svg>
+    </div>
+    <div>
+      <h1 style="font-family:'Sora',sans-serif;font-weight:700;font-size:20px;background:linear-gradient(90deg,#00E5C3,#7C6AFA);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;">S2H AI — Admin Panel</h1>
+      <p style="font-size:12px;color:#6B7280;margin-top:1px;">Cấu hình chatbot cho học viên · Street 2 Hand</p>
+    </div>
+  </div>
+</div>
+
+<!-- Main grid -->
+<div style="padding:24px 32px;display:grid;grid-template-columns:1fr 1fr;gap:20px;max-width:1100px;">
+
+  <!-- ① API KEY -->
+  <div class="card fade-in">
+    <div style="display:flex;align-items:center;gap:10px;margin-bottom:20px;">
+      <div class="section-dot"></div>
+      <h2 style="font-family:'Sora',sans-serif;font-size:15px;font-weight:600;">Gemini API Key</h2>
+      <span id="api-badge" class="badge badge-miss" style="margin-left:auto;">✕ Chưa có</span>
+    </div>
+    <label class="label">Google Gemini API Key</label>
+    <div style="position:relative;">
+      <input id="api-key" type="password" class="inp" placeholder="AIzaSy..." style="padding-right:44px;">
+      <button onclick="togglePw('api-key')" style="position:absolute;right:12px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;color:#6B7280;font-size:16px;">👁</button>
+    </div>
+    <p style="font-size:11px;color:#4B5563;margin-top:8px;">
+      Lấy key miễn phí tại <a href="https://aistudio.google.com/app/apikey" target="_blank" style="color:#00E5C3;">aistudio.google.com →</a><br>
+      Key chỉ lưu trên trình duyệt này, không gửi đi đâu cả.
+    </p>
+    <div style="margin-top:16px;">
+      <label class="label">Model AI</label>
+      <select id="ai-model" class="inp">
+        <option value="gemini-1.5-flash">gemini-1.5-flash (Nhanh, miễn phí)</option>
+        <option value="gemini-1.5-pro">gemini-1.5-pro (Mạnh hơn)</option>
+        <option value="gemini-2.0-flash">gemini-2.0-flash (Mới nhất)</option>
+      </select>
+    </div>
+  </div>
+
+  <!-- ② BRAND -->
+  <div class="card fade-in">
+    <div style="display:flex;align-items:center;gap:10px;margin-bottom:20px;">
+      <div class="section-dot"></div>
+      <h2 style="font-family:'Sora',sans-serif;font-size:15px;font-weight:600;">Thương hiệu & Lời chào</h2>
+    </div>
+    <label class="label">Tên hiển thị (trang User)</label>
+    <input id="brand-name" type="text" class="inp" placeholder="Street 2 Hand AI" style="margin-bottom:14px;">
+    <label class="label">Lời chào mở đầu</label>
+    <textarea id="welcome-msg" class="inp" style="min-height:160px;" placeholder="👋 Hi! Đây là Trợ lý AI..."></textarea>
+  </div>
+
+  <!-- ③ FILE BỘ NÃO -->
+  <div class="card fade-in">
+    <div style="display:flex;align-items:center;gap:10px;margin-bottom:20px;">
+      <div class="section-dot"></div>
+      <h2 style="font-family:'Sora',sans-serif;font-size:15px;font-weight:600;">File Bộ Não AI</h2>
+      <span style="font-size:11px;color:#6B7280;">(Quy tắc hành xử của bot)</span>
+      <span id="brain-badge" class="badge badge-miss" style="margin-left:auto;">✕ Trống</span>
+    </div>
+
+    <!-- Tabs -->
+    <div style="display:flex;gap:4px;background:#0F1117;border-radius:8px;padding:3px;margin-bottom:16px;">
+      <button class="tab-btn active" onclick="switchTab('brain','upload')" id="brain-tab-upload">📁 Tải file PDF</button>
+      <button class="tab-btn" onclick="switchTab('brain','text')" id="brain-tab-text">✏️ Nhập văn bản</button>
+    </div>
+
+    <div id="brain-upload-panel">
+      <div class="drop-zone" id="brain-drop" onclick="document.getElementById('brain-file').click()"
+        ondragover="dragOver(event,'brain-drop')" ondragleave="dragLeave('brain-drop')" ondrop="dropFile(event,'brain')">
+        <div style="font-size:28px;margin-bottom:8px;">📄</div>
+        <p style="font-size:13px;font-weight:500;color:#9CA3AF;">Kéo thả file PDF vào đây</p>
+        <p style="font-size:11px;color:#4B5563;margin-top:4px;">hoặc click để chọn file · PDF, TXT, MD</p>
+      </div>
+      <input type="file" id="brain-file" accept=".pdf,.txt,.md" class="hidden" onchange="handleFile(event,'brain')">
+      <div id="brain-file-info" style="display:none;" class="file-item" style="margin-top:10px;">
+        <span style="font-size:20px;">📄</span>
+        <div style="flex:1;min-width:0;">
+          <p id="brain-file-name" style="font-size:13px;font-weight:500;truncate;"></p>
+          <p id="brain-file-size" style="font-size:11px;color:#6B7280;"></p>
+        </div>
+        <button onclick="clearFile('brain')" class="btn-danger" style="padding:5px 10px;font-size:11px;">Xóa</button>
+      </div>
+    </div>
+
+    <div id="brain-text-panel" style="display:none;">
+      <textarea id="brain-text" class="inp" style="min-height:180px;" placeholder="Nhập toàn bộ nội dung bộ não / system prompt cho AI vào đây...&#10;&#10;Ví dụ: Bạn là trợ lý AI của Street 2 Hand, chuyên về XNK và Logistics..."></textarea>
+    </div>
+  </div>
+
+  <!-- ④ FILE TÀI LIỆU -->
+  <div class="card fade-in">
+    <div style="display:flex;align-items:center;gap:10px;margin-bottom:20px;">
+      <div class="section-dot"></div>
+      <h2 style="font-family:'Sora',sans-serif;font-size:15px;font-weight:600;">File Tài Liệu Khóa Học</h2>
+      <span style="font-size:11px;color:#6B7280;">(Nội dung AI tham chiếu)</span>
+      <span id="doc-badge" class="badge badge-miss" style="margin-left:auto;">✕ Trống</span>
+    </div>
+
+    <div style="display:flex;gap:4px;background:#0F1117;border-radius:8px;padding:3px;margin-bottom:16px;">
+      <button class="tab-btn active" onclick="switchTab('doc','upload')" id="doc-tab-upload">📁 Tải file PDF</button>
+      <button class="tab-btn" onclick="switchTab('doc','text')" id="doc-tab-text">✏️ Nhập văn bản</button>
+    </div>
+
+    <div id="doc-upload-panel">
+      <div class="drop-zone" id="doc-drop" onclick="document.getElementById('doc-file').click()"
+        ondragover="dragOver(event,'doc-drop')" ondragleave="dragLeave('doc-drop')" ondrop="dropFile(event,'doc')">
+        <div style="font-size:28px;margin-bottom:8px;">📚</div>
+        <p style="font-size:13px;font-weight:500;color:#9CA3AF;">Kéo thả file tài liệu vào đây</p>
+        <p style="font-size:11px;color:#4B5563;margin-top:4px;">Incoterms, hải quan, chứng từ... · PDF, TXT, MD</p>
+      </div>
+      <input type="file" id="doc-file" accept=".pdf,.txt,.md" class="hidden" onchange="handleFile(event,'doc')">
+      <div id="doc-file-info" style="display:none;" class="file-item">
+        <span style="font-size:20px;">📚</span>
+        <div style="flex:1;min-width:0;">
+          <p id="doc-file-name" style="font-size:13px;font-weight:500;"></p>
+          <p id="doc-file-size" style="font-size:11px;color:#6B7280;"></p>
+        </div>
+        <button onclick="clearFile('doc')" class="btn-danger" style="padding:5px 10px;font-size:11px;">Xóa</button>
+      </div>
+    </div>
+
+    <div id="doc-text-panel" style="display:none;">
+      <textarea id="doc-text" class="inp" style="min-height:180px;" placeholder="Nhập toàn bộ nội dung tài liệu khóa học vào đây...&#10;&#10;Ví dụ: Chương 1 - Incoterms 2020&#10;FOB (Free On Board): Người bán giao hàng lên tàu..."></textarea>
+    </div>
+  </div>
+
+</div>
+
+<!-- Save bar -->
+<div style="padding:0 32px 32px;max-width:1100px;">
+  <div class="card" style="display:flex;align-items:center;gap:16px;padding:16px 24px;">
+    <div style="flex:1;">
+      <p style="font-size:13px;font-weight:500;">Lưu cấu hình</p>
+      <p style="font-size:11px;color:#6B7280;margin-top:2px;">Tất cả dữ liệu lưu vào localStorage · Link User sẽ tự động cập nhật</p>
+    </div>
+    <button onclick="resetAll()" class="btn-danger">🗑 Xóa hết</button>
+    <button onclick="saveAll()" class="btn-primary" style="min-width:140px;">
+      💾 Lưu & Kích hoạt
+    </button>
+  </div>
+
+  <!-- Status summary -->
+  <div id="config-summary" style="margin-top:16px;display:grid;grid-template-columns:repeat(4,1fr);gap:12px;">
+    <div style="background:#1A1D27;border:1px solid rgba(255,255,255,0.06);border-radius:10px;padding:14px;text-align:center;">
+      <div id="sum-api" style="font-size:20px;margin-bottom:4px;">❌</div>
+      <p style="font-size:11px;color:#6B7280;">API Key</p>
+    </div>
+    <div style="background:#1A1D27;border:1px solid rgba(255,255,255,0.06);border-radius:10px;padding:14px;text-align:center;">
+      <div id="sum-brain" style="font-size:20px;margin-bottom:4px;">❌</div>
+      <p style="font-size:11px;color:#6B7280;">Bộ não AI</p>
+    </div>
+    <div style="background:#1A1D27;border:1px solid rgba(255,255,255,0.06);border-radius:10px;padding:14px;text-align:center;">
+      <div id="sum-doc" style="font-size:20px;margin-bottom:4px;">❌</div>
+      <p style="font-size:11px;color:#6B7280;">Tài liệu</p>
+    </div>
+    <div style="background:#1A1D27;border:1px solid rgba(255,255,255,0.06);border-radius:10px;padding:14px;text-align:center;">
+      <div id="sum-brand" style="font-size:20px;margin-bottom:4px;">❌</div>
+      <p style="font-size:11px;color:#6B7280;">Thương hiệu</p>
+    </div>
+  </div>
+</div>
+
+<!-- Toast -->
+<div id="toast" style="position:fixed;bottom:28px;right:28px;z-index:999;display:none;"></div>
+
+<script>
+// ─── STATE ─────────────────────────────
+let brainPdfBase64 = null, brainPdfName = null;
+let docPdfBase64 = null, docPdfName = null;
+
+// ─── LOAD SAVED ────────────────────────
+window.addEventListener('DOMContentLoaded', () => {
+  const cfg = getConfig();
+  if (cfg.apiKey) document.getElementById('api-key').value = cfg.apiKey;
+  if (cfg.model) document.getElementById('ai-model').value = cfg.model;
+  if (cfg.brandName) document.getElementById('brand-name').value = cfg.brandName;
+  if (cfg.welcomeMsg) document.getElementById('welcome-msg').value = cfg.welcomeMsg;
+  else document.getElementById('welcome-msg').value = `👋 Hi! Đây là Trợ lý AI hỗ trợ các bạn mua 2 khóa PASS XNK & Logistics của mình: Khoá Nghiệp vụ chứng từ & Khai báo hải quan và Khoá Sales XNK.\n\n💡 Trong quá trình học, nếu gặp nội dung khó hiểu hay cần một giảng viên giải đáp, bạn chỉ cần làm theo cách cực kỳ đơn giản sau:\n\n1. Gõ nhanh câu hỏi ngắn gọn: Cứ nhập thắc mắc của bạn một cách đơn giản, AI sẽ tự hiểu mà không cần trình bày phức tạp.\n\n2. Hoặc Chụp màn hình: Chụp lại bài tập, câu hỏi, lỗi tờ khai, mẫu chứng từ... rồi nhấn Ctrl + V dán thẳng vào đây để hỏi nhé!\n\n👉 Hãy nhập thắc mắc của bạn bên dưới, AI đã sẵn sàng hỗ trợ:`;
+
+  if (cfg.brainText) document.getElementById('brain-text').value = cfg.brainText;
+  if (cfg.docText) document.getElementById('doc-text').value = cfg.docText;
+
+  if (cfg.brainPdfName) {
+    brainPdfBase64 = cfg.brainPdf;
+    brainPdfName = cfg.brainPdfName;
+    showFileInfo('brain', cfg.brainPdfName, '(đã lưu)');
+  }
+  if (cfg.docPdfName) {
+    docPdfBase64 = cfg.docPdf;
+    docPdfName = cfg.docPdfName;
+    showFileInfo('doc', cfg.docPdfName, '(đã lưu)');
+  }
+  refreshSummary();
+});
+
+function getConfig() {
+  try { return JSON.parse(localStorage.getItem('s2h_admin_config') || '{}'); } catch { return {}; }
+}
+
+// ─── TABS ──────────────────────────────
+function switchTab(section, mode) {
+  document.getElementById(`${section}-upload-panel`).style.display = mode === 'upload' ? 'block' : 'none';
+  document.getElementById(`${section}-text-panel`).style.display = mode === 'text' ? 'block' : 'none';
+  document.getElementById(`${section}-tab-upload`).className = 'tab-btn' + (mode==='upload'?' active':'');
+  document.getElementById(`${section}-tab-text`).className = 'tab-btn' + (mode==='text'?' active':'');
+}
+
+// ─── FILE HANDLING ─────────────────────
+function dragOver(e, id) { e.preventDefault(); document.getElementById(id).classList.add('drag'); }
+function dragLeave(id) { document.getElementById(id).classList.remove('drag'); }
+function dropFile(e, section) {
+  e.preventDefault();
+  dragLeave(section + '-drop');
+  const file = e.dataTransfer.files[0];
+  if (file) processFile(file, section);
+}
+function handleFile(e, section) {
+  const file = e.target.files[0];
+  if (file) processFile(file, section);
+}
+
+function processFile(file, section) {
+  const maxMB = 4;
+  if (file.size > maxMB * 1024 * 1024) {
+    showToast(`⚠️ File quá lớn (tối đa ${maxMB}MB). Vui lòng dùng tab Nhập văn bản.`, 'warn');
+    return;
+  }
+  const reader = new FileReader();
+  reader.onload = e => {
+    const result = e.target.result;
+    if (file.type === 'application/pdf') {
+      const b64 = result.split(',')[1];
+      if (section === 'brain') { brainPdfBase64 = b64; brainPdfName = file.name; }
+      else { docPdfBase64 = b64; docPdfName = file.name; }
+    } else {
+      // txt/md: store as text
+      const textEl = document.getElementById(`${section}-text`);
+      textEl.value = result;
+      switchTab(section, 'text');
+    }
+    showFileInfo(section, file.name, formatSize(file.size));
+    updateBadge(section, true);
+    refreshSummary();
+  };
+  if (file.type === 'application/pdf') reader.readAsDataURL(file);
+  else reader.readAsText(file);
+}
+
+function showFileInfo(section, name, size) {
+  document.getElementById(`${section}-file-info`).style.display = 'flex';
+  document.getElementById(`${section}-file-name`).textContent = name;
+  document.getElementById(`${section}-file-size`).textContent = size;
+  document.getElementById(`${section}-drop`).style.display = 'none';
+}
+
+function clearFile(section) {
+  if (section === 'brain') { brainPdfBase64 = null; brainPdfName = null; }
+  else { docPdfBase64 = null; docPdfName = null; }
+  document.getElementById(`${section}-file-info`).style.display = 'none';
+  document.getElementById(`${section}-drop`).style.display = 'block';
+  document.getElementById(`${section}-file`).value = '';
+  updateBadge(section, false);
+  refreshSummary();
+}
+
+function formatSize(bytes) {
+  if (bytes < 1024) return bytes + ' B';
+  if (bytes < 1024*1024) return (bytes/1024).toFixed(1) + ' KB';
+  return (bytes/1024/1024).toFixed(1) + ' MB';
+}
+
+function updateBadge(section, hasData) {
+  const el = document.getElementById(`${section}-badge`);
+  el.className = 'badge ' + (hasData ? 'badge-ok' : 'badge-miss');
+  el.textContent = hasData ? '✓ Có dữ liệu' : '✕ Trống';
+}
+
+// ─── SAVE ──────────────────────────────
+function saveAll() {
+  const apiKey = document.getElementById('api-key').value.trim();
+  const model = document.getElementById('ai-model').value;
+  const brandName = document.getElementById('brand-name').value.trim() || 'Street 2 Hand AI';
+  const welcomeMsg = document.getElementById('welcome-msg').value.trim();
+  const brainText = document.getElementById('brain-text').value.trim();
+  const docText = document.getElementById('doc-text').value.trim();
+
+  if (!apiKey) { showToast('⚠️ Vui lòng nhập API Key trước!', 'warn'); return; }
+
+  const cfg = {
+    apiKey, model, brandName, welcomeMsg,
+    brainText, docText,
+    brainPdf: brainPdfBase64,
+    brainPdfName: brainPdfName,
+    docPdf: docPdfBase64,
+    docPdfName: docPdfName,
+    savedAt: new Date().toISOString()
+  };
+
+  try {
+    localStorage.setItem('s2h_admin_config', JSON.stringify(cfg));
+    showToast('✅ Đã lưu & kích hoạt! Link User đã sẵn sàng.', 'ok');
+    refreshSummary();
+  } catch(e) {
+    showToast('❌ Lỗi lưu (có thể do file PDF quá lớn). Hãy dùng tab Nhập văn bản.', 'err');
+  }
+}
+
+function resetAll() {
+  if (!confirm('Xóa toàn bộ cấu hình?')) return;
+  localStorage.removeItem('s2h_admin_config');
+  location.reload();
+}
+
+// ─── SUMMARY ───────────────────────────
+function refreshSummary() {
+  const cfg = getConfig();
+  const apiKey = document.getElementById('api-key').value.trim() || cfg.apiKey;
+  const brain = brainPdfBase64 || document.getElementById('brain-text').value.trim() || cfg.brainPdf || cfg.brainText;
+  const doc = docPdfBase64 || document.getElementById('doc-text').value.trim() || cfg.docPdf || cfg.docText;
+  const brand = document.getElementById('brand-name').value.trim() || cfg.brandName;
+
+  document.getElementById('sum-api').textContent = apiKey ? '✅' : '❌';
+  document.getElementById('sum-brain').textContent = brain ? '✅' : '❌';
+  document.getElementById('sum-doc').textContent = doc ? '✅' : '❌';
+  document.getElementById('sum-brand').textContent = brand ? '✅' : '❌';
+
+  const allOk = !!(apiKey && brand);
+  const dot = document.getElementById('status-dot');
+  const txt = document.getElementById('status-text');
+  if (allOk) {
+    dot.style.background = '#00E5C3'; dot.style.boxShadow = '0 0 6px rgba(0,229,195,0.6)';
+    txt.style.color = '#00E5C3'; txt.textContent = 'Đang hoạt động';
+  } else {
+    dot.style.background = '#F5A623'; dot.style.boxShadow = '0 0 6px rgba(245,166,35,0.5)';
+    txt.style.color = '#F5A623'; txt.textContent = 'Chưa đủ cấu hình';
+  }
+
+  // update badges
+  updateBadge('api-badge-standalone', !!apiKey);
+  document.getElementById('api-badge').className = 'badge ' + (apiKey ? 'badge-ok' : 'badge-miss');
+  document.getElementById('api-badge').textContent = apiKey ? '✓ Đã có' : '✕ Chưa có';
+}
+
+function updateBadge(id, ok) {
+  const el = document.getElementById(id);
+  if (!el) return;
+  el.className = 'badge ' + (ok ? 'badge-ok' : 'badge-miss');
+  el.textContent = ok ? '✓ Có' : '✕ Chưa';
+}
+
+// ─── UTILS ─────────────────────────────
+function togglePw(id) {
+  const el = document.getElementById(id);
+  el.type = el.type === 'password' ? 'text' : 'password';
+}
+
+function showToast(msg, type) {
+  const t = document.getElementById('toast');
+  const colors = { ok:'rgba(0,229,195,0.12)', warn:'rgba(245,166,35,0.12)', err:'rgba(255,91,91,0.12)' };
+  const borders = { ok:'rgba(0,229,195,0.3)', warn:'rgba(245,166,35,0.3)', err:'rgba(255,91,91,0.3)' };
+  t.style.cssText = `position:fixed;bottom:28px;right:28px;z-index:999;background:${colors[type]||colors.ok};border:1px solid ${borders[type]||borders.ok};padding:12px 18px;border-radius:12px;font-size:13px;font-weight:500;color:#E2E8F0;backdrop-filter:blur(10px);max-width:320px;`;
+  t.textContent = msg;
+  t.style.display = 'block';
+  setTimeout(() => t.style.display = 'none', 3500);
+}
+</script>
+</body>
+</html>
